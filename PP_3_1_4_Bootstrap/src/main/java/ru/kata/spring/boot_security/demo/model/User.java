@@ -31,6 +31,14 @@ public class User implements UserDetails {
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Collection<Role> roles;
 
+    public String roleToString() {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (Role role : roles) {
+            stringBuilder.append(role.getRoleName()).append(" ");
+        }
+        return stringBuilder.toString();
+    }
+
     @Override
     public String toString() {
         return "User{" +
