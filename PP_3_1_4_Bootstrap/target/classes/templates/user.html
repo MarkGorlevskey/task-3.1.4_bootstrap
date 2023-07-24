@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Search Result</title>
+</head>
+<body>
+<div align="center">
+    <h2>Search Result</h2>
+    <table border="1" cellpadding="5">
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Last Name</th>
+            <th>E-mail</th>
+            <th>Age</th>
+            <th>Password</th>
+            <th>Role</th>
+        </tr>
+        <tr th:object="${user}">
+            <td th:text="${user.id}"></td>
+            <td th:text="${user.name}"></td>
+            <td th:text="${user.lastName}"></td>
+            <td th:text="${user.email}"></td>
+            <td th:text="${user.age}"></td>
+            <td th:text="${user.password}"></td>
+            <td th:text="${user.roles}"></td>
+        </tr>
+    </table>
+</div>
+<div>
+    <a th:href="@{/admin}">To the main page</a>
+</div>
+<div align="left"><a th:href="@{/logout}">Logout</a></div>
+</body>
+</html>
