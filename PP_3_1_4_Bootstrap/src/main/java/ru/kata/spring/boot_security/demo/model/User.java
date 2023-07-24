@@ -1,83 +1,84 @@
-package ru.kata.spring.boot_security.demo.service;
+package ru.kata.spring.boot_security.demo.model;
 
-
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import ru.kata.spring.boot_security.demo.configs.WebSecurityConfig;
-import ru.kata.spring.boot_security.demo.model.Role;
-import ru.kata.spring.boot_security.demo.model.User;
-import ru.kata.spring.boot_security.demo.repositories.UserRepository;
 
+import javax.persistence.*;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
+@Entity
+@Data
+@Table(name = "users")
+@NoArgsConstructor
+@AllArgsConstructor
+public class User implements UserDetails {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String name;
+    private String lastName;
+    private String email;
+    private Integer age;
+    private String password;
 
-@Service
-public class UserServiceImp implements UserService {
-    private final UserRepository userRepository;
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.PERSIST})
+    @JoinTable(name = "users_role",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id"))
+    private Collection<Role> roles;
 
-    public UserServiceImp(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
-
-    @Transactional
-    @Override
-    public void save(User user) {
-        user.setPassword(WebSecurityConfig.passwordEncoder().encode(user.getPassword()));
-        userRepository.save(user);
-    }
-
-    @Override
-    public User findById(Long id) {
-        User user = null;
-        Optional<User> optional = userRepository.findById(id);
-        if (optional.isPresent()) {
-            user = optional.get();
+    public String roleToString() {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (Role role : roles) {
+            stringBuilder.append(role.getRoleName()).append(" ");
         }
-        return user;
+        return stringBuilder.toString();
     }
 
     @Override
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
-    }
-
-    @Transactional
-    @Override
-    public void update(User user, Long id) {
-        userRepository.save(user);
-    }
-
-    @Transactional
-    @Override
-    public void deleteById(Long id) {
-        userRepository.deleteById(id);
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", last_name='" + lastName + '\'' +
+                ", email='" + email + '\'' +
+                ", age=" + age +
+                ", password='" + password + '\'' +
+                ", roles=" + roles +
+                '}';
     }
 
     @Override
-    public User findByUsername(String email) {
-        return userRepository.findByEmail(email);
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return getRoles();
     }
 
     @Override
-    @Transactional
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = findByUsername(username);
-        if (user == null) {
-            throw new UsernameNotFoundException(String.format("User '%s' not found", username));
-        }
-
-        return new org.springframework.security.core.userdetails.User(user.getName(), user.getPassword(),
-                mapRoleAuthority(user.getRoles()));
+    public String getUsername() {
+        return email;
     }
 
-    private Collection<? extends GrantedAuthority> mapRoleAuthority (Collection<Role> roles) {
-        return roles.stream().map(r -> new SimpleGrantedAuthority(r.getName())).collect(Collectors.toList());
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
     }
 }
