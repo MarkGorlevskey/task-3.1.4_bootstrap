@@ -7,6 +7,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.kata.spring.boot_security.demo.configs.WebSecurityConfig;
 import ru.kata.spring.boot_security.demo.model.Role;
 import ru.kata.spring.boot_security.demo.model.User;
 import ru.kata.spring.boot_security.demo.repositories.UserRepository;
@@ -28,6 +29,7 @@ public class UserServiceImp implements UserService {
     @Transactional
     @Override
     public void save(User user) {
+        user.setPassword(WebSecurityConfig.passwordEncoder().encode(user.getPassword()));
         userRepository.save(user);
     }
 
