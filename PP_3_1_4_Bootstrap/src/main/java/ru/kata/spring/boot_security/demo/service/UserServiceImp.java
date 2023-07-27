@@ -33,6 +33,18 @@ public class UserServiceImp implements UserService {
         userRepository.save(user);
     }
 
+    @Transactional
+    @Override
+    public User saveUser(User user) {
+        return userRepository.save(user);
+    }
+
+    @Transactional
+    @Override
+    public void deleteUser(Long id) {
+        userRepository.deleteById(id);
+    }
+
     @Override
     public User findById(Long id) {
         User user = null;
@@ -51,7 +63,12 @@ public class UserServiceImp implements UserService {
     @Transactional
     @Override
     public void update(User user, Long id) {
-        userRepository.save(user);
+        User user1 = userRepository.findById(id).orElseThrow(() -> new RuntimeException(""));
+        user1.setName(user.getName());
+        user1.setLastName(user.getLastName());
+        user1.setEmail(user.getEmail());
+        user1.setRoles(user.getRoles());
+        userRepository.save(user1);
     }
 
     @Transactional

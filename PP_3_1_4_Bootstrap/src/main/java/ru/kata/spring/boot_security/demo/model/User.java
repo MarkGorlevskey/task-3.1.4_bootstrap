@@ -2,18 +2,18 @@ package ru.kata.spring.boot_security.demo.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 @Data
 @Table(name = "users")
-@NoArgsConstructor
 @AllArgsConstructor
 public class User implements UserDetails {
     @Id
@@ -25,6 +25,10 @@ public class User implements UserDetails {
     private Integer age;
     private String password;
 
+    public User() {
+        this.roles = new ArrayList<>();
+    }
+
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     @JoinTable(name = "users_role",
             joinColumns = @JoinColumn(name = "user_id"),
@@ -34,7 +38,7 @@ public class User implements UserDetails {
     public String roleToString() {
         StringBuilder stringBuilder = new StringBuilder();
         for (Role role : roles) {
-            stringBuilder.append(role.getRoleName()).append(" ");
+            stringBuilder.append(role.toString()).append(" ");
         }
         return stringBuilder.toString();
     }
@@ -50,6 +54,14 @@ public class User implements UserDetails {
                 ", password='" + password + '\'' +
                 ", roles=" + roles +
                 '}';
+    }
+
+    public void addRole(Role role) {
+        roles.add(role);
+    }
+
+    public List<String> getNameRoles() {
+        return this.roles.stream().map(Role::toString).map(x->x.substring(5)).collect(Collectors.toList());
     }
 
     @Override

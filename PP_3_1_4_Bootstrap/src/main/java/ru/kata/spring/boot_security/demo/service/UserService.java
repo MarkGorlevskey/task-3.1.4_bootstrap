@@ -10,8 +10,10 @@ import java.util.List;
 
 public interface UserService extends UserDetailsService {
     void save(User user);
+    User saveUser(User user);
 
     User findById(Long id);
+    void deleteUser(Long id);
 
     List<User> getAllUsers();
 
